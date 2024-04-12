@@ -213,6 +213,25 @@ void free_draw(const Box& box) {
 #include <memory>
 #include <vector>
 
+// to test the implementation, we add a new object here
+class Cylinder {
+public:
+    Cylinder(double radius, Point center = Point{})
+        : radius_(radius), center_(center) {
+    }
+
+    double GetRadius() const { return radius_; }
+    Point GetCenter() const { return center_; }
+
+private:
+    double radius_;
+    Point center_;
+};
+
+void free_draw(const Cylinder& cylinder){
+    std::cout << "Cylinder with radius = " << cylinder.GetRadius() << " at " << cylinder.GetCenter() << '\n';
+}
+
 using Objects = std::vector<Object>;
 
 void DrawAllObjects(const Objects& objects) {
@@ -225,6 +244,11 @@ int main() {
     Objects objects;
     objects.emplace_back(Sphere{1.0});
     objects.emplace_back(Box{0.1, 0.2, 0.3, Point{}}, gl::GLDrawStrategy{gl::Color::blue});
+    objects.emplace_back(Cylinder{0.15, Point{0.2, 0.3}});
+    objects.emplace_back(Cylinder{0.15, Point{0.2, 0.3}}, [](const Cylinder& c) {
+        std::cout << "This is a custom strategy for the cylinder (radius = " << c.GetRadius()
+                  << ", center = " << c.GetCenter() << "\n";
+    });
 
     DrawAllObjects(objects);
 }
