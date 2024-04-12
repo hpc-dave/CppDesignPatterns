@@ -81,7 +81,7 @@ private:
     DrawStrategy drawer_;
 };
 
-// ---- GLDrawStrategy ----
+// ---- GLDrawStrategy.h ----
 // #include <Sphere.h>
 // #include <Box.h>
 namespace gl {
@@ -131,18 +131,14 @@ private:
 } // end namespace gl
 
 // ---- main.cpp ----
-// #include <Draw.h>
 // #include <Sphere.h>
 // #include <Box.h>
-// #include <SphereDraw.h>  <-- Note that those could also be part of Draw.h
-// #include <BoxDraw.h>     <-- Note that those could also be part of Draw.h
+// #include <GLDrawStrategy.h>
 #include <vector>
 #include <memory>
 using ObjectPtr = std::unique_ptr<Object>;
 using Objects = std::vector<ObjectPtr>;
 
-// Inside this function, the Draw FunctionObject is used
-// as a Visitor
 void DrawAllObjects(const Objects& objects) {
     for (const auto& object : objects) {
         object->draw();
