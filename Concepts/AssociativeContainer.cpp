@@ -36,6 +36,17 @@ struct IsAssociativeContainer : std::bool_constant<AssociativeContainer<T>> {};
 template <typename T>
 constexpr bool IsAssociativeContainer_v = IsAssociativeContainer<T>::value;
 
+// template<typename T, typename V>
+// std::enable_if_t<!IsAssociativeContainer_v<T>> addElement(T& container, const V& value) {
+//     std::cout << "Adding to Container\n";
+//     container.push_back(value);
+// }
+
+// template <typename T, typename V>
+// std::enable_if_t<IsAssociativeContainer_v<T>> addElement(T& container, const V& value) {
+//     std::cout << "Adding to Associative Container\n";
+//     container.insert(value);
+// }
 
 template<typename T, typename V>
 void addElement(T& container, const V& value) {

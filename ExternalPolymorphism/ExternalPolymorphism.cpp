@@ -1,4 +1,5 @@
-// ---- Point.h ----
+#include <iostream>
+
 struct Point {
     explicit Point(double x = 0., double y = 0., double z = 0.)
         : x_(x), y_(y), z_(z) {
@@ -17,42 +18,56 @@ OS& operator<<(OS& os, const Point& point) {
     return os;
 }
 
-// ---- Sphere.h ----
-// #include <Point.h>
-
 class Sphere {
 public:
-    explicit Sphere(double radius, Point center = Point{})
-        : radius_(radius), center_(center) {}
+    explicit Sphere(double r, Point c = Point{})
+        : radius(r), center(c) {}
 
-    double GetRadius() const { return radius_; }
+    double GetRadius() const { return radius; }
 
-    Point GetCenter() const { return center_; }
+    Point GetCenter() const { return center; }
+
+    void GetInfo() const {
+        std::cout << "I am a Sphere at point " << center << " with radius " << radius << std::endl;
+    }
 
 private:
-    double radius_;
-    Point center_;
+    double radius;
+    Point center;
 };
+
+void free_get_info(const Sphere& s){
+    std::cout << "I am a Sphere at point " << s.GetCenter() << " with radius " << s.GetRadius() << std::endl;
+}
 
 // ---- Box.h ----
 // #include <Point.h>
 class Box {
 public:
-    explicit Box(double width, double length, double height, Point center = Point{})
-        : width_(width), length_(length), height_(height), center_(center) {
+    explicit Box(double w, double l, double h, Point c = Point{})
+        : width(w), length(l), height(h), center(c) {
     }
-    double GetWidth() const { return width_; }
-    double GetLength() const { return length_; }
-    double GetHeight() const { return height_; }
+    double GetWidth() const { return width; }
+    double GetLength() const { return length; }
+    double GetHeight() const { return height; }
 
-    Point GetCenter() const { return center_; }
+    Point GetCenter() const { return center; }
+
+    void GetInfo() const { std::cout << "I am a Box at point " << center << " with width = "
+        << width << ", length = " << length << " and height = " << height << std::endl;
+    }
 
 private:
-    double width_;
-    double length_;
-    double height_;
-    Point center_;
+    double width;
+    double length;
+    double height;
+    Point center;
 };
+
+void free_get_info(const Box& b) {
+    std::cout << "I am a Box at point " << b.GetCenter() << " with width = "
+              << b.GetWidth() << ", length = " << b.GetLength() << " and height = " << b.GetHeight() << std::endl;
+}
 
 // ---- Object.h
 
@@ -61,72 +76,25 @@ private:
 class ObjectConcept {
 public:
     virtual ~ObjectConcept() = default;
-    virtual void draw() const = 0;
+    virtual void GetInfo() const = 0;
 };
 
-template<typename TObject, typename DrawStrategy>
+template<typename TObject>
 class ObjectModel : public ObjectConcept {
 public:
-    ObjectModel(const TObject& object, DrawStrategy drawer)
-        : object_{object}, drawer_{std::move(drawer)} {
+    ObjectModel(const TObject& o)
+        : object{o} {
         }
     
-    void draw() const override {
-        drawer_(object_);
+    void GetInfo() const override {
+        // free_get_info(object);
+        object.GetInfo();
     }
+
 private:
-    TObject object_;
-    DrawStrategy drawer_;
+    TObject object;
 };
 
-// ---- GLDrawStrategy.h ----
-// #include <Sphere.h>
-// #include <Box.h>
-#include <iostream>
-
-namespace gl {
-    enum class Color {
-        red,
-        green,
-        blue
-    };
-
-    std::string to_string(const Color& color) {
-        switch (color) {
-        case Color::red:
-            return "red";
-        case Color::green:
-            return "green";
-        case Color::blue:
-            return "blue";
-        default:
-            return "unknown";
-        }
-    }
-
-    class GLDrawStrategy {
-    public:
-        explicit GLDrawStrategy(Color color)
-            : color_(color) {}
-
-        void operator()(const Sphere& sphere) const {
-            std::cout << "Sphere with radius = " << sphere.GetRadius()
-                      << " at " << sphere.GetCenter()
-                      << " and color = " << to_string(color_) << '\n';
-        }
-
-        void operator()(const Box& box) const {
-            std::cout << "Box with width = " << box.GetWidth()
-                      << " length = " << box.GetLength()
-                      << " height = " << box.GetHeight()
-                      << " at " << box.GetCenter()
-                      << " and color = " << to_string(color_) << '\n';
-        }
-
-    private:
-        Color color_;
-    };
-}  // end namespace gl
 
 // ---- main.cpp-----
 #include <vector>
@@ -134,21 +102,21 @@ namespace gl {
 
 using Objects = std::vector<std::unique_ptr<ObjectConcept>>;
 
-void DrawAllObjects(const Objects& objects) {
+void GetAllInfo(const Objects& objects) {
     for (const auto& object : objects) {
-        object->draw();
+        object->GetInfo();
     }
 }
 
-template<typename TObject, typename DrawStrategy>
-auto make_object(const TObject& object, DrawStrategy drawer){
-    return std::make_unique<ObjectModel<TObject, DrawStrategy>>(object, drawer);
+template<typename TObject>
+auto make_object(const TObject& object){
+    return std::make_unique<ObjectModel<TObject>>(object);
 }
 
 int main() {
     Objects objects;
-    objects.emplace_back(make_object(Sphere{1.0}, gl::GLDrawStrategy{gl::Color::red}));
-    objects.emplace_back(make_object(Box{0.1, 0.2, 0.3, Point{}}, gl::GLDrawStrategy{gl::Color::blue}));
+    objects.emplace_back(make_object(Sphere{1.0}));
+    objects.emplace_back(make_object(Box{0.1, 0.2, 0.3, Point{}}));
 
-    DrawAllObjects(objects);
+    GetAllInfo(objects);
 }
